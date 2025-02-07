@@ -1,34 +1,58 @@
-document.getElementById('signin-form').addEventListener('submit', function(event) {
-    event.preventDefault(); // Prevent form submission
+const bear = document.getElementById("bear");
+const foods = document.querySelectorAll(".food");
+const gameContainer = document.querySelector(".game-container");
 
-    const submitBtn = document.getElementById('submit-btn');
-    const errorMessage = document.getElementById('error-message');
+let speed = 4;
+let maxSize = 100;
+let bearSize = 40;
+let position = { x: 280, y: 180 };
+let keys = { w: false, a: false, s: false, d: false };
 
-    // Disable button and show spinner
-    submitBtn.classList.add('loading');
-    submitBtn.disabled = true;
+function moveBear() {
+    if (keys.w && position.y > 0) position.y -= speed;
+    if (keys.s && position.y < gameContainer.clientHeight - bearSize) position.y += speed;
+    if (keys.a && position.x > 0) position.x -= speed;
+    if (keys.d && position.x < gameContainer.clientWidth - bearSize) position.x += speed;
 
-    // Simulate a network request with a delay
-    setTimeout(() => {
-        // Get input values
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
+    bear.style.left = position.x + "px";
+    bear.style.top = position.y + "px";
 
-        // Simple validation
-        if (username === '' || password === '') {
-            errorMessage.textContent = 'Please fill in all fields.';
-            errorMessage.style.display = 'block';
-        } else if (username !== 'admin' || password !== 'password') {
-            errorMessage.textContent = 'Invalid username or password.';
-            errorMessage.style.display = 'block';
-        } else {
-            errorMessage.style.display = 'none';
-            alert('Sign in successful!');
-            // Here you can redirect the user to another page or perform other actions
+    foods.forEach((food) => {
+        if (checkCollision(bear, food)) {
+            food.remove();
+            if (bearSize < maxSize) {
+                bearSize += 10;
+                bear.style.width = bearSize + "px";
+                bear.style.height = bearSize + "px";
+            }
         }
+    });
 
-        // Re-enable button and hide spinner
-        submitBtn.classList.remove('loading');
-        submitBtn.disabled = false;
-    }, 1500); // Simulate a 1.5-second delay
+    requestAnimationFrame(moveBear);
+}
+
+function checkCollision(bear, food) {
+    let bRect = bear.getBoundingClientRect();
+    let fRect = food.getBoundingClientRect();
+    return !(
+        bRect.top > fRect.bottom ||
+        bRect.bottom < fRect.top ||
+        bRect.left > fRect.right ||
+        bRect.right < fRect.left
+    );
+}
+
+document.addEventListener("keydown", (e) => {
+    if (keys.hasOwnProperty(e.key)) keys[e.key] = true;
 });
+
+document.addEventListener("keyup", (e) => {
+    if (keys.hasOwnProperty(e.key)) keys[e.key] = false;
+});
+
+foods.forEach(food => {
+    food.style.left = Math.random() * (gameContainer.clientWidth - 20) + "px";
+    food.style.top = Math.random() * (gameContainer.clientHeight - 20) + "px";
+});
+
+moveBear();
