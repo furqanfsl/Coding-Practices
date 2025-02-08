@@ -1,58 +1,22 @@
-const bear = document.getElementById("bear");
-const foods = document.querySelectorAll(".food");
-const gameContainer = document.querySelector(".game-container");
+function generateHearts() {
+    for (let i = 0; i < 10; i++) {
+        let heart = document.createElement("div");
+        heart.classList.add("heart");
+        heart.innerHTML = "❤️";
 
-let speed = 4;
-let maxSize = 100;
-let bearSize = 40;
-let position = { x: 280, y: 180 };
-let keys = { w: false, a: false, s: false, d: false };
+        let xOffset = Math.random() * 100 - 50; // Random position near the text
+        let yOffset = Math.random() * 20 - 10;
 
-function moveBear() {
-    if (keys.w && position.y > 0) position.y -= speed;
-    if (keys.s && position.y < gameContainer.clientHeight - bearSize) position.y += speed;
-    if (keys.a && position.x > 0) position.x -= speed;
-    if (keys.d && position.x < gameContainer.clientWidth - bearSize) position.x += speed;
+        let box = document.getElementById("box");
+        let boxRect = box.getBoundingClientRect();
 
-    bear.style.left = position.x + "px";
-    bear.style.top = position.y + "px";
+        heart.style.left = `${boxRect.left + boxRect.width / 2 + xOffset}px`;
+        heart.style.top = `${boxRect.top + yOffset}px`;
 
-    foods.forEach((food) => {
-        if (checkCollision(bear, food)) {
-            food.remove();
-            if (bearSize < maxSize) {
-                bearSize += 10;
-                bear.style.width = bearSize + "px";
-                bear.style.height = bearSize + "px";
-            }
-        }
-    });
+        document.body.appendChild(heart);
 
-    requestAnimationFrame(moveBear);
+        setTimeout(() => {
+            heart.remove();
+        }, 2000);
+    }
 }
-
-function checkCollision(bear, food) {
-    let bRect = bear.getBoundingClientRect();
-    let fRect = food.getBoundingClientRect();
-    return !(
-        bRect.top > fRect.bottom ||
-        bRect.bottom < fRect.top ||
-        bRect.left > fRect.right ||
-        bRect.right < fRect.left
-    );
-}
-
-document.addEventListener("keydown", (e) => {
-    if (keys.hasOwnProperty(e.key)) keys[e.key] = true;
-});
-
-document.addEventListener("keyup", (e) => {
-    if (keys.hasOwnProperty(e.key)) keys[e.key] = false;
-});
-
-foods.forEach(food => {
-    food.style.left = Math.random() * (gameContainer.clientWidth - 20) + "px";
-    food.style.top = Math.random() * (gameContainer.clientHeight - 20) + "px";
-});
-
-moveBear();
